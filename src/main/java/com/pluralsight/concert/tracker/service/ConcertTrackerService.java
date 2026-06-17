@@ -70,4 +70,7 @@ public class ConcertTrackerService {
     public List<Artist> findArtistsByName(String name) {
         return artistRepository.findByNameContainingIgnoreCase(name);
     }
+    public List<Promoter> findPromotersByName(String name) {
+        return promoterRepository.findByNameContainingIgnoreCase(name);
+    }
 }

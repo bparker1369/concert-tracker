@@ -392,7 +392,79 @@ public class ConcertTrackerApplication implements CommandLineRunner {
     }
 
     private void promotersMenu() {
+        int choice = -1;
+        while (choice != 0) {
+            System.out.println("\n=== PROMOTERS ===");
+            System.out.println("1) List all promoters");
+            System.out.println("2) Add a promoter");
+            System.out.println("3) Find by name");
+            System.out.println("4) Delete a promoter");
+            System.out.println("0) Back");
+            System.out.print("Choose: ");
+            try {
+                choice = Integer.parseInt(scanner.nextLine().trim());
+            } catch (Exception e) {
+                choice = -1;
+            }
+            switch (choice) {
+                case 1 -> listAllPromoters();
+                case 2 -> addPromoter();
+                case 3 -> findPromotersByName();
+                case 4 -> deletePromoter();
+                case 0 -> System.out.println("Returning to main menu...");
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
 
+    }
+    private void listAllPromoters() {
+        List<Promoter> promoters = service.getAllPromoters();
+        if (promoters.isEmpty()) {
+            System.out.println("No promoters found.");
+        } else {
+            System.out.println("\n--- All Promoters ---");
+            for (Promoter p : promoters) {
+                System.out.println("ID: " + p.getId() + " | " + p.getName());
+            }
+        }
+    }
+
+    private void addPromoter() {
+        System.out.print("Promoter name: ");
+        String name = scanner.nextLine().trim();
+        Promoter p = new Promoter();
+        p.setName(name);
+        service.savePromoter(p);
+        System.out.println("Promoter added!");
+    }
+
+    private void findPromotersByName() {
+        System.out.print("Enter name to search: ");
+        String name = scanner.nextLine().trim();
+        List<Promoter> promoters = service.findPromotersByName(name);
+        if (promoters.isEmpty()) {
+            System.out.println("No promoters found with that name.");
+        } else {
+            for (Promoter p : promoters) {
+                System.out.println("ID: " + p.getId() + " | " + p.getName());
+            }
+        }
+    }
+
+    private void deletePromoter() {
+        System.out.print("Enter promoter ID to delete: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Promoter> promoter = service.getPromoterById(id);
+            if (promoter.isPresent()) {
+                service.deletePromoter(id);
+                System.out.println("Promoter deleted!");
+            } else {
+                System.out.println("No promoter found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
     }
 
     private void reportsMenu() {

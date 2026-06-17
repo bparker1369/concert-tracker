@@ -73,4 +73,31 @@ public class ConcertTrackerService {
     public List<Promoter> findPromotersByName(String name) {
         return promoterRepository.findByNameContainingIgnoreCase(name);
     }
+    public List<Concert> findConcertsByYear(int year) {
+        return concertRepository.findByYear(year);
+    }
+
+    public List<Concert> findConcertsByArtist(String name) {
+        return concertRepository.findByArtist_NameContainingIgnoreCase(name);
+    }
+
+    public List<Concert> findConcertsByVenue(String name) {
+        return concertRepository.findByVenue_NameIgnoreCase(name);
+    }
+
+    public List<Concert> findConcertsByCity(String city) {
+        return concertRepository.findByVenue_CityIgnoreCase(city);
+    }
+
+    public List<Concert> findConcertsByMaxPrice(double price) {
+        return concertRepository.findByTicketPriceLessThanEqual(price);
+    }
+
+    public List<Concert> findConcertsByPriceRange(double min, double max) {
+        return concertRepository.findByTicketPriceBetween(min, max);
+    }
+
+    public List<Concert> findConcertsByMaxPriceAndYear(double price, int year) {
+        return concertRepository.findByTicketPriceLessThanEqualAndYearGreaterThanEqual(price, year);
+    }
 }

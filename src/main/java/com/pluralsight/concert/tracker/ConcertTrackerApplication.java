@@ -388,7 +388,146 @@ public class ConcertTrackerApplication implements CommandLineRunner {
         }
     }
     private void searchMenu() {
+        int choice = -1;
+        while (choice != 0) {
+            System.out.println("\n=== SEARCH CONCERTS ===");
+            System.out.println("1) By year");
+            System.out.println("2) By artist");
+            System.out.println("3) By venue");
+            System.out.println("4) By city");
+            System.out.println("5) By maximum price");
+            System.out.println("6) By price range");
+            System.out.println("7) Advanced search");
+            System.out.println("0) Back");
+            System.out.print("Choose: ");
+            try {
+                choice = Integer.parseInt(scanner.nextLine().trim());
+            } catch (Exception e) {
+                choice = -1;
+            }
+            switch (choice) {
+                case 1 -> searchByYear();
+                case 2 -> searchByArtist();
+                case 3 -> searchByVenue();
+                case 4 -> searchByCity();
+                case 5 -> searchByMaxPrice();
+                case 6 -> searchByPriceRange();
+                case 7 -> searchAdvanced();
+                case 0 -> System.out.println("Returning to main menu...");
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
 
+    }
+    private void searchByYear() {
+        System.out.print("Enter year: ");
+        try {
+            int year = Integer.parseInt(scanner.nextLine().trim());
+            List<Concert> concerts = service.findConcertsByYear(year);
+            if (concerts.isEmpty()) {
+                System.out.println("No concerts found for that year.");
+            } else {
+                for (Concert c : concerts) {
+                    System.out.println("ID: " + c.getId() + " | " + c.getArtist().getName() + " at " + c.getVenue().getName() + " (" + c.getYear() + ")");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void searchByArtist() {
+        System.out.print("Enter artist name: ");
+        String name = scanner.nextLine().trim();
+        List<Concert> concerts = service.findConcertsByArtist(name);
+        if (concerts.isEmpty()) {
+            System.out.println("No concerts found for that artist.");
+        } else {
+            for (Concert c : concerts) {
+                System.out.println("ID: " + c.getId() + " | " + c.getArtist().getName() + " at " + c.getVenue().getName() + " (" + c.getYear() + ")");
+            }
+        }
+    }
+
+    private void searchByVenue() {
+        System.out.print("Enter venue name: ");
+        String name = scanner.nextLine().trim();
+        List<Concert> concerts = service.findConcertsByVenue(name);
+        if (concerts.isEmpty()) {
+            System.out.println("No concerts found for that venue.");
+        } else {
+            for (Concert c : concerts) {
+                System.out.println("ID: " + c.getId() + " | " + c.getArtist().getName() + " at " + c.getVenue().getName() + " (" + c.getYear() + ")");
+            }
+        }
+    }
+
+    private void searchByCity() {
+        System.out.print("Enter city: ");
+        String city = scanner.nextLine().trim();
+        List<Concert> concerts = service.findConcertsByCity(city);
+        if (concerts.isEmpty()) {
+            System.out.println("No concerts found in that city.");
+        } else {
+            for (Concert c : concerts) {
+                System.out.println("ID: " + c.getId() + " | " + c.getArtist().getName() + " at " + c.getVenue().getName() + " (" + c.getYear() + ")");
+            }
+        }
+    }
+
+    private void searchByMaxPrice() {
+        System.out.print("Enter maximum price: ");
+        try {
+            double price = Double.parseDouble(scanner.nextLine().trim());
+            List<Concert> concerts = service.findConcertsByMaxPrice(price);
+            if (concerts.isEmpty()) {
+                System.out.println("No concerts found at or below that price.");
+            } else {
+                for (Concert c : concerts) {
+                    System.out.println("ID: " + c.getId() + " | " + c.getArtist().getName() + " at " + c.getVenue().getName() + " | $" + c.getTicketPrice());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void searchByPriceRange() {
+        System.out.print("Enter minimum price: ");
+        try {
+            double min = Double.parseDouble(scanner.nextLine().trim());
+            System.out.print("Enter maximum price: ");
+            double max = Double.parseDouble(scanner.nextLine().trim());
+            List<Concert> concerts = service.findConcertsByPriceRange(min, max);
+            if (concerts.isEmpty()) {
+                System.out.println("No concerts found in that price range.");
+            } else {
+                for (Concert c : concerts) {
+                    System.out.println("ID: " + c.getId() + " | " + c.getArtist().getName() + " at " + c.getVenue().getName() + " | $" + c.getTicketPrice());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void searchAdvanced() {
+        System.out.print("Enter maximum price: ");
+        try {
+            double price = Double.parseDouble(scanner.nextLine().trim());
+            System.out.print("Enter earliest year: ");
+            int year = Integer.parseInt(scanner.nextLine().trim());
+            List<Concert> concerts = service.findConcertsByMaxPriceAndYear(price, year);
+            if (concerts.isEmpty()) {
+                System.out.println("No concerts found matching those criteria.");
+            } else {
+                for (Concert c : concerts) {
+                    System.out.println("ID: " + c.getId() + " | " + c.getArtist().getName() + " at " + c.getVenue().getName() + " | $" + c.getTicketPrice() + " (" + c.getYear() + ")");
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
     }
 
     private void promotersMenu() {

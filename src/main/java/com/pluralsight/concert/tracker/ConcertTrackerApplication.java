@@ -84,6 +84,11 @@ public class ConcertTrackerApplication implements CommandLineRunner {
             }
             switch (choice) {
                 case 1 -> concertsMenu();
+                case 2 -> searchMenu();
+                case 3 -> artistsMenu();
+                case 4 -> venuesMenu();
+                case 5 -> promotersMenu();
+                case 6 -> reportsMenu();
                 case 0 -> System.out.println("Goodbye!");
                 default -> System.out.println("Invalid choice, try again.");
             }
@@ -266,5 +271,135 @@ public class ConcertTrackerApplication implements CommandLineRunner {
         } catch (Exception e) {
             System.out.println("Invalid ID.");
         }
+    }
+    private void artistsMenu() {
+        int choice = -1;
+        while (choice != 0) {
+            System.out.println("\n=== ARTISTS ===");
+            System.out.println("1) List all artists");
+            System.out.println("2) Add an artist");
+            System.out.println("3) Find by genre");
+            System.out.println("4) Find by name");
+            System.out.println("5) Update genre");
+            System.out.println("6) Delete an artist");
+            System.out.println("0) Back");
+            System.out.print("Choose: ");
+            try {
+                choice = Integer.parseInt(scanner.nextLine().trim());
+            } catch (Exception e) {
+                choice = -1;
+            }
+            switch (choice) {
+                case 1 -> listAllArtists();
+                case 2 -> addArtist();
+                case 3 -> findArtistsByGenre();
+                case 4 -> findArtistsByName();
+                case 5 -> updateArtistGenre();
+                case 6 -> deleteArtist();
+                case 0 -> System.out.println("Returning to main menu...");
+                default -> System.out.println("Invalid choice, try again.");
+            }
+        }
+    }
+
+    private void listAllArtists() {
+        List<Artist> artists = service.getAllArtists();
+        if (artists.isEmpty()) {
+            System.out.println("No artists found.");
+        } else {
+            System.out.println("\n--- All Artists ---");
+            for (Artist a : artists) {
+                System.out.println("ID: " + a.getId() + " | " + a.getName() + " | " + a.getGenre());
+            }
+        }
+    }
+
+    private void addArtist() {
+        System.out.print("Artist name: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("Genre: ");
+        String genre = scanner.nextLine().trim();
+        Artist a = new Artist();
+        a.setName(name);
+        a.setGenre(genre);
+        service.saveArtist(a);
+        System.out.println("Artist added!");
+    }
+
+    private void findArtistsByGenre() {
+        System.out.print("Enter genre: ");
+        String genre = scanner.nextLine().trim();
+        List<Artist> artists = service.findArtistsByGenre(genre);
+        if (artists.isEmpty()) {
+            System.out.println("No artists found with that genre.");
+        } else {
+            for (Artist a : artists) {
+                System.out.println("ID: " + a.getId() + " | " + a.getName() + " | " + a.getGenre());
+            }
+        }
+    }
+
+    private void findArtistsByName() {
+        System.out.print("Enter name to search: ");
+        String name = scanner.nextLine().trim();
+        List<Artist> artists = service.findArtistsByName(name);
+        if (artists.isEmpty()) {
+            System.out.println("No artists found with that name.");
+        } else {
+            for (Artist a : artists) {
+                System.out.println("ID: " + a.getId() + " | " + a.getName() + " | " + a.getGenre());
+            }
+        }
+    }
+
+    private void updateArtistGenre() {
+        System.out.print("Enter artist ID: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Artist> artist = service.getArtistById(id);
+            if (artist.isPresent()) {
+                System.out.print("New genre: ");
+                String genre = scanner.nextLine().trim();
+                Artist a = artist.get();
+                a.setGenre(genre);
+                service.saveArtist(a);
+                System.out.println("Genre updated!");
+            } else {
+                System.out.println("No artist found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void deleteArtist() {
+        System.out.print("Enter artist ID to delete: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Artist> artist = service.getArtistById(id);
+            if (artist.isPresent()) {
+                service.deleteArtist(id);
+                System.out.println("Artist deleted!");
+            } else {
+                System.out.println("No artist found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+    private void searchMenu() {
+
+    }
+
+    private void promotersMenu() {
+
+    }
+
+    private void reportsMenu() {
+
+    }
+
+    private void venuesMenu() {
+
     }
 }

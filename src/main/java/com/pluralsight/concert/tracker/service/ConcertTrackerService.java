@@ -51,4 +51,23 @@ public class ConcertTrackerService {
     public Concert updateConcert(Concert concert) {
         return concertRepository.save(concert);
     }
+    public List<Venue> findVenuesByCity(String city) {
+        return venueRepository.findByCity(city);
+    }
+
+    public List<Venue> findVenuesByName(String name) {
+        return venueRepository.findByNameContainingIgnoreCase(name);
+    }
+
+    public List<Venue> findVenuesByMinCapacity(int capacity) {
+        return venueRepository.findByCapacityGreaterThanEqual(capacity);
+    }
+
+    public List<Artist> findArtistsByGenre(String genre) {
+        return artistRepository.findByGenreIgnoreCase(genre);
+    }
+
+    public List<Artist> findArtistsByName(String name) {
+        return artistRepository.findByNameContainingIgnoreCase(name);
+    }
 }

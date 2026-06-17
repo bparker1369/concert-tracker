@@ -6,12 +6,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import com.pluralsight.concert.tracker.repository.ConcertRepository;
-
 import java.util.Optional;
 import java.util.Scanner;
-
 import java.util.List;
-import java.util.Scanner;
 
 @SpringBootApplication
 public class ConcertTrackerApplication implements CommandLineRunner {
@@ -100,6 +97,11 @@ public class ConcertTrackerApplication implements CommandLineRunner {
         while (choice != 0) {
             System.out.println("\n=== CONCERTS ===");
             System.out.println("1) List all concerts");
+            System.out.println("2) View concert by ID");
+            System.out.println("3) Add a concert");
+            System.out.println("4) Update ticket price");
+            System.out.println("5) Update tickets sold");
+            System.out.println("6) Delete a concert");
             System.out.println("0) Back");
             System.out.print("Choose: ");
             try {
@@ -109,6 +111,11 @@ public class ConcertTrackerApplication implements CommandLineRunner {
             }
             switch (choice) {
                 case 1 -> listAllConcerts();
+                case 2 -> viewConcertById();
+                case 3 -> addConcert();
+                case 4 -> updateTicketPrice();
+                case 5 -> updateTicketsSold();
+                case 6 -> deleteConcert();
                 case 0 -> System.out.println("Returning to main menu...");
                 default -> System.out.println("Invalid choice, try again.");
             }
@@ -607,10 +614,231 @@ public class ConcertTrackerApplication implements CommandLineRunner {
     }
 
     private void reportsMenu() {
+            int choice = -1;
+            while (choice != 0) {
+                System.out.println("\n=== REPORTS ===");
+                System.out.println("1) Revenue per venue");
+                System.out.println("2) Busiest venue and artist");
+                System.out.println("3) Average ticket price by year");
+                System.out.println("4) Capacity report");
+                System.out.println("0) Back");
+                System.out.print("Choose: ");
+                try {
+                    choice = Integer.parseInt(scanner.nextLine().trim());
+                } catch (Exception e) {
+                    choice = -1;
+                }
+                switch (choice) {
+                    case 1 -> revenuePerVenue();
+                    case 2 -> busiestVenueAndArtist();
+                    case 3 -> avgPriceByYear();
+                    case 4 -> capacityReport();
+                    case 0 -> System.out.println("Returning to main menu...");
+                    default -> System.out.println("Invalid choice, try again.");
+                }
+            }
+    }
+    private void revenuePerVenue() {
+        List<Object[]> results = service.getRevenuePerVenue();
+        if (results.isEmpty()) {
+            System.out.println("No data found.");
+        } else {
+            System.out.println("\n--- Revenue Per Venue ---");
+            for (Object[] row : results) {
+                System.out.printf("%-30s $%,.2f%n", row[0], row[1]);
+            }
+        }
+    }
 
+    private void busiestVenueAndArtist() {
+        Object[] venue = service.getBusiestVenue();
+        Object[] artist = service.getBusiestArtist();
+        System.out.println("\n--- Busiest Venue & Artist ---");
+        if (venue != null) {
+            System.out.println("Busiest Venue: " + venue[0] + " (" + venue[1] + " concerts)");
+        }
+        if (artist != null) {
+            System.out.println("Busiest Artist: " + artist[0] + " (" + artist[1] + " concerts)");
+        }
+    }
+
+    private void avgPriceByYear() {
+        List<Object[]> results = service.getAvgPriceByYear();
+        if (results.isEmpty()) {
+            System.out.println("No data found.");
+        } else {
+            System.out.println("\n--- Average Ticket Price By Year ---");
+            for (Object[] row : results) {
+                System.out.printf("Year: %s | Avg Price: $%,.2f%n", row[0], row[1]);
+            }
+        }
+    }
+
+    private void capacityReport() {
+        List<Concert> concerts = service.getAllConcerts();
+        if (concerts.isEmpty()) {
+            System.out.println("No concerts found.");
+        } else {
+            System.out.println("\n--- Capacity Report ---");
+            for (Concert c : concerts) {
+                int capacity = c.getVenue().getCapacity();
+                int sold = c.getTicketsSold();
+                double percent = (double) sold / capacity * 100;
+                String status = sold >= capacity ? " *** SOLD OUT ***" : "";
+                System.out.printf("%-20s at %-25s | %d/%d (%.1f%%)%s%n",
+                        c.getArtist().getName(),
+                        c.getVenue().getName(),
+                        sold, capacity, percent, status);
+            }
+        }
     }
 
     private void venuesMenu() {
+            int choice = -1;
+            while (choice != 0) {
+            System.out.println("\n=== VENUES ===");
+            System.out.println("1) List all venues");
+            System.out.println("2) Add a venue");
+            System.out.println("3) Find by city");
+            System.out.println("4) Find by name");
+            System.out.println("5) Find by minimum capacity");
+            System.out.println("6) Update capacity");
+            System.out.println("7) Delete a venue");
+            System.out.println("0) Back");
+            System.out.print("Choose: ");
+            try {
+                choice = Integer.parseInt(scanner.nextLine().trim());
+                } catch (Exception e) {
+                    choice = -1;
+                }
+                switch (choice) {
+                    case 1 -> listAllVenues();
+                    case 2 -> addVenue();
+                    case 3 -> findVenuesByCity();
+                    case 4 -> findVenuesByName();
+                    case 5 -> findVenuesByMinCapacity();
+                    case 6 -> updateVenueCapacity();
+                    case 7 -> deleteVenue();
+                    case 0 -> System.out.println("Returning to main menu...");
+                    default -> System.out.println("Invalid choice, try again.");
+                }
+            }
+    }
+    private void findVenuesByCity() {
+        System.out.print("Enter city: ");
+        String city = scanner.nextLine().trim();
+        List<Venue> venues = service.findVenuesByCity(city);
+        if (venues.isEmpty()) {
+            System.out.println("No venues found in " + city);
+        } else {
+            for (Venue v : venues) {
+                System.out.println("ID: " + v.getId() + " | " + v.getName() + " | Capacity: " + v.getCapacity());
+            }
+        }
+    }
 
+    private void findVenuesByName() {
+        System.out.print("Enter name to search: ");
+        String name = scanner.nextLine().trim();
+        List<Venue> venues = service.findVenuesByName(name);
+        if (venues.isEmpty()) {
+            System.out.println("No venues found with that name.");
+        } else {
+            for (Venue v : venues) {
+                System.out.println("ID: " + v.getId() + " | " + v.getName() + " | " + v.getCity());
+            }
+        }
+    }
+
+    private void findVenuesByMinCapacity() {
+        System.out.print("Enter minimum capacity: ");
+        try {
+            int capacity = Integer.parseInt(scanner.nextLine().trim());
+            List<Venue> venues = service.findVenuesByMinCapacity(capacity);
+            if (venues.isEmpty()) {
+                System.out.println("No venues found with that capacity.");
+            } else {
+                for (Venue v : venues) {
+                    System.out.println("ID: " + v.getId() + " | " + v.getName() + " | Capacity: " + v.getCapacity());
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void updateVenueCapacity() {
+        System.out.print("Enter venue ID: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Venue> venue = service.getVenueById(id);
+            if (venue.isPresent()) {
+                System.out.print("New capacity: ");
+                int capacity = Integer.parseInt(scanner.nextLine().trim());
+                if (capacity < 0) {
+                    System.out.println("Capacity cannot be negative.");
+                    return;
+                }
+                Venue v = venue.get();
+                v.setCapacity(capacity);
+                service.saveVenue(v);
+                System.out.println("Capacity updated!");
+            } else {
+                System.out.println("No venue found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void deleteVenue() {
+        System.out.print("Enter venue ID to delete: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Venue> venue = service.getVenueById(id);
+            if (venue.isPresent()) {
+                service.deleteVenue(id);
+                System.out.println("Venue deleted!");
+            } else {
+                System.out.println("No venue found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void listAllVenues() {
+        List<Venue> venues = service.getAllVenues();
+        if (venues.isEmpty()) {
+            System.out.println("No venues found.");
+        } else {
+            System.out.println("\n--- All Venues ---");
+            for (Venue v : venues) {
+                System.out.println("ID: " + v.getId() + " | " + v.getName() + " | " + v.getCity() + " | Capacity: " + v.getCapacity());
+            }
+        }
+    }
+
+    private void addVenue() {
+        System.out.print("Venue name: ");
+        String name = scanner.nextLine().trim();
+        System.out.print("City: ");
+        String city = scanner.nextLine().trim();
+        System.out.print("Capacity: ");
+        try {
+            int capacity = Integer.parseInt(scanner.nextLine().trim());
+            if (capacity < 0) {
+                System.out.println("Capacity cannot be negative.");
+                return;
+            }
+            Venue v = new Venue();
+            v.setName(name);
+            v.setCity(city);
+            v.setCapacity(capacity);
+            service.saveVenue(v);
+            System.out.println("Venue added!");
+        } catch (Exception e) {
+            System.out.println("Invalid capacity.");
+        }
     }
 }

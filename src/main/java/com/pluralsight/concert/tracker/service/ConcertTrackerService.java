@@ -100,4 +100,21 @@ public class ConcertTrackerService {
     public List<Concert> findConcertsByMaxPriceAndYear(double price, int year) {
         return concertRepository.findByTicketPriceLessThanEqualAndYearGreaterThanEqual(price, year);
     }
+    public List<Object[]> getRevenuePerVenue() {
+        return concertRepository.getRevenuePerVenue();
+    }
+
+    public Object[] getBusiestVenue() {
+        List<Object[]> results = concertRepository.getBusiestVenue();
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    public Object[] getBusiestArtist() {
+        List<Object[]> results = concertRepository.getBusiestArtist();
+        return results.isEmpty() ? null : results.get(0);
+    }
+
+    public List<Object[]> getAvgPriceByYear() {
+        return concertRepository.getAvgPriceByYear();
+    }
 }

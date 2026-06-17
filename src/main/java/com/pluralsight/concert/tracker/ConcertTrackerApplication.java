@@ -5,6 +5,10 @@ import com.pluralsight.concert.tracker.service.ConcertTrackerService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import com.pluralsight.concert.tracker.repository.ConcertRepository;
+
+import java.util.Optional;
+import java.util.Scanner;
 
 import java.util.List;
 import java.util.Scanner;
@@ -115,6 +119,152 @@ public class ConcertTrackerApplication implements CommandLineRunner {
             for (Concert c : concerts) {
                 System.out.println("ID: " + c.getId() + " | " + c.getArtist().getName() + " at " + c.getVenue().getName() + " (" + c.getYear() + ")");
             }
+        }
+    }
+
+    private void viewConcertById() {
+        System.out.print("Enter concert ID: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Concert> concert = service.getConcertById(id);
+            if (concert.isPresent()) {
+                Concert c = concert.get();
+                System.out.println("\n--- Concert Details ---");
+                System.out.println("ID: " + c.getId());
+                System.out.println("Artist: " + c.getArtist().getName());
+                System.out.println("Venue: " + c.getVenue().getName());
+                System.out.println("Promoter: " + c.getPromoter().getName());
+                System.out.println("Year: " + c.getYear());
+                System.out.println("Ticket Price: $" + c.getTicketPrice());
+                System.out.println("Tickets Sold: " + c.getTicketsSold());
+            } else {
+                System.out.println("No concert found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid ID.");
+        }
+    }
+
+    private void addConcert() {
+        System.out.println("\n--- Artists ---");
+        service.getAllArtists().forEach(a -> System.out.println(a.getId() + ") " + a.getName()));
+        System.out.print("Choose artist ID: ");
+        int artistId = Integer.parseInt(scanner.nextLine().trim());
+
+        System.out.println("\n--- Venues ---");
+        service.getAllVenues().forEach(v -> System.out.println(v.getId() + ") " + v.getName()));
+        System.out.print("Choose venue ID: ");
+        int venueId = Integer.parseInt(scanner.nextLine().trim());
+
+        System.out.println("\n--- Promoters ---");
+        service.getAllPromoters().forEach(p -> System.out.println(p.getId() + ") " + p.getName()));
+        System.out.print("Choose promoter ID: ");
+        int promoterId = Integer.parseInt(scanner.nextLine().trim());
+
+        System.out.print("Year: ");
+        int year = Integer.parseInt(scanner.nextLine().trim());
+
+        System.out.print("Ticket Price: ");
+        double price = Double.parseDouble(scanner.nextLine().trim());
+
+        System.out.print("Tickets Sold: ");
+        int ticketsSold = Integer.parseInt(scanner.nextLine().trim());
+
+        var artist = service.getArtistById(artistId);
+        var venue = service.getVenueById(venueId);
+        var promoter = service.getPromoterById(promoterId);
+
+        if (artist.isEmpty() || venue.isEmpty() || promoter.isEmpty()) {
+            System.out.println("Invalid artist, venue, or promoter ID.");
+            return;
+        }
+
+        if (price < 0 || ticketsSold < 0) {
+            System.out.println("Price and tickets sold cannot be negative.");
+            return;
+        }
+
+        if (ticketsSold > venue.get().getCapacity()) {
+            System.out.println("Tickets sold cannot exceed venue capacity of " + venue.get().getCapacity());
+            return;
+        }
+
+        Concert c = new Concert();
+        c.setArtist(artist.get());
+        c.setVenue(venue.get());
+        c.setPromoter(promoter.get());
+        c.setYear(year);
+        c.setTicketPrice(price);
+        c.setTicketsSold(ticketsSold);
+        service.saveConcert(c);
+        System.out.println("Concert added!");
+    }
+
+    private void updateTicketPrice() {
+        System.out.print("Enter concert ID: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Concert> concert = service.getConcertById(id);
+            if (concert.isPresent()) {
+                System.out.print("New ticket price: ");
+                double price = Double.parseDouble(scanner.nextLine().trim());
+                if (price < 0) {
+                    System.out.println("Price cannot be negative.");
+                    return;
+                }
+                Concert c = concert.get();
+                c.setTicketPrice(price);
+                service.updateConcert(c);
+                System.out.println("Ticket price updated!");
+            } else {
+                System.out.println("No concert found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void updateTicketsSold() {
+        System.out.print("Enter concert ID: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Concert> concert = service.getConcertById(id);
+            if (concert.isPresent()) {
+                Concert c = concert.get();
+                System.out.print("New tickets sold: ");
+                int ticketsSold = Integer.parseInt(scanner.nextLine().trim());
+                if (ticketsSold < 0) {
+                    System.out.println("Tickets sold cannot be negative.");
+                    return;
+                }
+                if (ticketsSold > c.getVenue().getCapacity()) {
+                    System.out.println("Tickets sold cannot exceed venue capacity of " + c.getVenue().getCapacity());
+                    return;
+                }
+                c.setTicketsSold(ticketsSold);
+                service.updateConcert(c);
+                System.out.println("Tickets sold updated!");
+            } else {
+                System.out.println("No concert found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid input.");
+        }
+    }
+
+    private void deleteConcert() {
+        System.out.print("Enter concert ID to delete: ");
+        try {
+            int id = Integer.parseInt(scanner.nextLine().trim());
+            Optional<Concert> concert = service.getConcertById(id);
+            if (concert.isPresent()) {
+                service.deleteConcert(id);
+                System.out.println("Concert deleted!");
+            } else {
+                System.out.println("No concert found with that ID.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid ID.");
         }
     }
 }

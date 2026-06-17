@@ -48,4 +48,7 @@ public class ConcertTrackerService {
     public Optional<Concert> getConcertById(int id) { return concertRepository.findById(id); }
     public Concert saveConcert(Concert concert) { return concertRepository.save(concert); }
     public void deleteConcert(int id) { concertRepository.deleteById(id); }
+    public Concert updateConcert(Concert concert) {
+        return concertRepository.save(concert);
+    }
 }
